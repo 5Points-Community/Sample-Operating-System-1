@@ -4,6 +4,8 @@ org 0x7C00
 ; Código Geral
 ; Simplesmente um Loop Infinito
 loop:
+	cmp (use_ram), (max_ram)
+	je  abort
 	jmp loop
 
 ; Aqui tem a Função de Abortar o Boot
@@ -11,6 +13,7 @@ abort:
 	mov si, (ram_error)
 	mov 0x0E
 	int 0x10
+	hlt
 
 ; Cria as Variáveis
 section .data
