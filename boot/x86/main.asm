@@ -1,20 +1,6 @@
 ; Inicia o Código no Endereço de Boot
 org 0x7C00
 
-; Código Geral
-; Simplesmente um Loop Infinito
-loop:
-	cmp (use_ram), (max_ram)
-	je  abort
-	jmp loop
-
-; Aqui tem a Função de Abortar o Boot
-abort:
-	mov si, (ram_error)
-	mov 0x0E
-	int 0x10
-	hlt
-
 ; Cria as Variáveis
 section .data
 	; Defina o quanto de RAM pode ser Usada no Máximo
@@ -23,6 +9,35 @@ section .data
  	use_ram   db 0x000
 	; Mensagem de Aborto por excesso de RAM usada no Boot
 	ram_error db "Detectamos um Uso Escessivo de RAM no Bootloader, Abortamos o Boot por Segurança", 0x00
+
+; Código Geral
+section .text
+; Simplesmente um Loop Infinito
+loop:
+	cmp byte [use_ram], byte [max_ram]
+	je  abort
+	jmp loop
+
+; Aqui tem a Função de Abortar o Boot
+abort:
+	mov si, (ram_error)
+	hlt
+
+; Imprime a String... ou Algo do Tipo
+print_str:
+	mov ah, 0x0E
+
+; Imprime o Caractere, EBAAAA
+print_chr:
+	lodsb
+	cmp al, 0x00
+	je  print_done
+	int 0x10
+	jmp print_chr
+
+; Nome Auto-Explicativo, Certo?
+print_done:
+	ret
 
 times 510-($-$$) db 0x00
 db 0x55
